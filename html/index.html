@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Popup</title>
+    <!-- Link to your CSS file, if any -->
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body id="app-container">
+    <header>
+        <div id="title">
+            <h1 id="greeting"></h1> <!-- Placeholder for the greeting message -->
+            <h3>Welcome to PromptStack</h3>
+        </div>
+        <div id="brand">
+            <img src="/images/icon128.png">
+        </div>
+    </header>
+    <main>
+        <div id="overlay"></div>
+        <div id="prompt-search">
+            <i class="fa fa-search icon"></i>
+            <input id="search-input" class="input-field" type="search" placeholder="Search for a saved prompt">
+        </div>
+        <div id="prompt-list" class="grid-container">
+        </div>
+        <button id="load-more-prompts">Load More</button>
+        <div id="notification"></div>
+    </main>
+    <footer>
+        <button id="add-prompt" class="fa fa-plus icon" type="button"></button>
+        <div id="prompt-form" class="prompt-container">
+            <form>
+                <h2>Add New Prompt</h2>
+                <button id="close-button" class="fa fa-close icon" type="button"></button>
+                <input id="prompt-name" class="input-field" type="text" placeholder="Prompt title">
+                <textarea id="prompt-content" class="input-field" placeholder="Add your prompt" rows="6"></textarea>
+                <button type="submit" class="save-button">Save</button>
+            </form>
+        </div>
+    </footer>
+    <script src="/js/ui.js"></script>
+    <script src="/js/popup.js"></script>
+</body>
+</html>

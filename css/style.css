@@ -1,0 +1,264 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+#app-container {
+    min-width: 400px;
+    min-height: 500px;
+    max-height: 90vh;
+    background: #F9F7F6;
+    margin: 20px;
+}
+
+header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: top;
+    margin-bottom: 20px;
+}
+
+div#brand {
+    padding-top: 8px;
+}
+
+div#brand img {
+    width: 30px;
+    height: 30px;
+}
+
+h1 {
+    font-size: 3em;
+    line-height: 1.1;
+    margin: 0;
+    margin-bottom: 7px;
+}
+
+h3 {
+    font-weight: 400;
+    font-size: 1.5em;
+    margin: 0;
+
+}
+
+div#prompt-search {
+    background: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start; 
+    align-items: center;
+    border-radius: 10px;
+    padding: 5px 10px;
+    border: 1px solid transparent; 
+    margin-bottom: 20px;
+}
+
+div#prompt-search.focused {
+    border: 1px solid #7430c9; /* Apply border color when focused */
+}
+
+#prompt-search .icon {
+    color: #7430c9;
+    font-size: 1rem;
+    padding: 10px;
+}
+
+.prompt-container button, .grid-container .copy-button {
+    border-radius: 50%;
+    border: 0;
+    font-size: 1.2em;
+    width: 2em;
+    height: 2em;
+    margin-right: 5px;
+}
+
+button.view-button, .prompt-container .save-button {
+    background: #181a35;
+    color: white;
+    border: 0;
+    height: 2.2em;
+    border-radius: 10px;
+    padding: 0 10px;
+    width: auto;
+}
+
+.prompt-container .save-button {
+    background: green;
+}
+
+div#view-prompt h3 {
+    font-weight: 700;
+    font-weight: 700;
+}
+
+.prompt-container p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.grid-container .copy-button {
+    float: right;
+}
+
+button.copy-button {
+    background: #55a8a9;
+    color: white;
+}
+
+button.edit-button {
+    background: #3393f0;
+    color: white;
+}
+
+button.delete-button {
+    color: white;
+    background: #be1c4a;
+    float: right;
+}
+
+input#search-input {
+    width: 100%;
+    border: 0;
+    padding: 0;
+    margin-left: 10px;
+    outline: none; 
+    font-size: 1rem;
+}
+
+button#add-prompt {
+    background: #fd2886;
+    padding: 0px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    position: fixed;
+    bottom: 5%;
+    right: 5%;
+    color: white;
+    font-size: 1.2em;
+    font-weight: 100;
+}
+
+#close-button, #close-view-button {
+    background: #f9f7f6;
+    padding: 0px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    color: #181a35;
+    font-size: 1.3em;
+    font-weight: 100;
+}
+
+.prompt-container {
+    background: white;
+    position: absolute;
+    bottom: 0;
+    right: 5%;
+    border-radius: 10px 10px 0 0;
+    padding: 20px;
+    width: 90%;
+    box-sizing: border-box;
+    max-height: 400px;
+    min-height: 250px;
+    overflow-y: scroll;
+    z-index: 5;
+
+}
+
+#prompt-form {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.2s, transform 0.2s; 
+    position: absolute; /* Position the form absolutely */
+    top: -9999px; /* Move the form off-screen */
+    left: 0;
+    right: 0;
+    margin: auto;
+    z-index: 3; /* Ensure edit form appears on top when visible */
+}
+
+#view-prompt button:last-child {
+    margin-bottom: 0; /* Remove bottom margin from the last button */
+}
+
+
+#prompt-form.visible {
+    opacity: 1; 
+    transform: translateY(0); 
+    top: 50%; /* Center the form vertically when visible */
+}
+
+#prompt-form input,
+#prompt-form textarea,
+#prompt-form button {
+    /* Ensure elements within the form have a higher z-index */
+    z-index: 5;
+}
+
+#prompt-form input, div#prompt-form textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    padding: 5px;
+}
+
+
+#prompt-form h2 {
+    margin-top: 0;
+}
+
+#prompt-form button {
+    display: block;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+}
+
+.prompt-list_item {
+    padding: 15px;
+    border-radius: 20px;
+    background-color: white;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.prompt-list_item h3 {
+    margin: 0;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.prompt-list_item p {
+    margin: 0;
+    font-size: 1.1em;
+    margin-bottom: 20px;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Adjust the opacity as needed */
+    z-index: 2; /* Ensure the overlay is above other elements */
+    display: none; /* Initially hide the overlay */
+}
+
+textarea { resize: vertical; }
