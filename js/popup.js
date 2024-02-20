@@ -108,15 +108,20 @@ function handleFormSubmit(event) {
             form.removeAttribute('data-editing-id');
             document.getElementById('prompt-form').classList.remove('visible'); // Remove 'visible' class from the correct element
             form.classList.add('newclass');
-            hideOverlay(); // This call ensures the overlay is hidden
-        
+            
             // Reload or update the prompt list based on the action (edit or add)
             if (isEdit) {
                 loadAndDisplayPrompts();
             } else {
                 loadAndDisplayPrompts(); // Reload prompt list to display all prompts
             }
-            console.log("After reload");
+            
+            // Hide overlay only if the view prompt box is closed
+            const viewPromptElement = document.getElementById('view-prompt');
+            const viewPromptOpen = viewPromptElement !== null;
+            if (!viewPromptOpen) {
+                hideOverlay();
+            }
         });
     });
 }
@@ -320,6 +325,13 @@ function handleEdit(event) {
             console.log('Edit button clicked');
             form.classList.add('visible');
 
+            // Update the content in the view prompt box if it's open
+            const viewPromptElement = document.getElementById('view-prompt');
+            if (viewPromptElement) {
+                viewPromptElement.querySelector('h3').textContent = promptToEdit.title;
+                viewPromptElement.querySelector('p').textContent = promptToEdit.content;
+            }
+
             // Update the content in the grid view
             const promptListItem = document.querySelector(`.prompt-list_item[data-id="${promptId}"]`);
             if (promptListItem) {
@@ -330,11 +342,17 @@ function handleEdit(event) {
                     excerptElement.textContent = truncateString(promptToEdit.content, 90);
                 }
             }
-        }
-        showOverlay();
 
+            // Hide overlay only if the view prompt box is closed
+            const viewPromptOpen = viewPromptElement !== null;
+            if (!viewPromptOpen) {
+                hideOverlay();
+            }
+        }
     });
 }
+
+
 
 function removePromptFromList(id) {
     const promptElement = document.querySelector(`.prompt-list_item[data-id="${id}"]`);
