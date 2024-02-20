@@ -252,7 +252,11 @@ function handleView(event) {
                 document.body.appendChild(viewPromptElement);
                 document.querySelector('#view-prompt .copy-button').addEventListener('click', copyHandler);
                 document.querySelector('#view-prompt .edit-button').addEventListener('click', () => handleEdit(promptToView.id));
-                document.querySelector('#view-prompt .delete-button').addEventListener('click', () => handleDelete(promptToView.id));
+                document.querySelector('#view-prompt .delete-button').addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const customEvent = { target: { getAttribute: () => promptToView.id } };
+                    handleDelete(customEvent);
+                });
                 document.getElementById('close-view-button').addEventListener('click', () => {
                     viewPromptElement.remove();
                     hideOverlay();
