@@ -262,3 +262,21 @@ button:hover {
 }
 
 textarea { resize: vertical; }
+
+div#notification {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    max-width: 70%;
+    height: auto;
+    padding: 15px;
+    background: #171a35;
+    display: none;
+    margin: auto;
+    border-radius: 15px;
+    z-index: 9999999;
+    box-shadow: 0px 0px 20px 0px #60606026;
+    color: white;
+    font-size: 1.3em;
+}

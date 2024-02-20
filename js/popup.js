@@ -96,9 +96,9 @@ function handleFormSubmit(event) {
             form.reset();
             form.removeAttribute('data-editing-id');
             form.classList.remove('visible');
-            hideOverlay();
+            hideOverlay(); // This call ensures the overlay is hidden
 
-            // Reload or update the prompt list based on the action (edit or add)
+           // Reload or update the prompt list based on the action (edit or add)
             if (isEdit) {
                 loadAndDisplayPrompts();
             } else {
@@ -107,6 +107,7 @@ function handleFormSubmit(event) {
         });
     });
 }
+
 
 function handleDelete(event) {
     if (!confirm("Are you sure you want to delete this prompt?")) return;
@@ -245,11 +246,11 @@ function handleView(event) {
                         <p>${promptToView.content}</p>
                     </div>
                     <div class="prompt-actions">
-                        <button class="copy-button" data-content="${promptToView.content}">Copy</button>
-                        <button class="edit-button" data-id="${promptToView.id}">Edit</button>
-                        <button class="delete-button" data-id="${promptToView.id}">Delete</button>
+                        <button class="copy-button fa fa-copy icon" data-content="${promptToView.content}"></button>
+                        <button class="edit-button fa fa-edit icon" data-id="${promptToView.id}"></button>
+                        <button class="delete-button fa fa-trash icon" data-id="${promptToView.id}"></button>
                     </div>
-                    <button id="close-view-button">Close</button>
+                    <button id="close-view-button" class="fa fa-close icon"></button>
                 `;
 
                 document.body.appendChild(viewPromptElement);
