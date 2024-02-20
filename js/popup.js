@@ -97,12 +97,12 @@ function handleFormSubmit(event) {
             form.removeAttribute('data-editing-id');
             form.classList.remove('visible');
             hideOverlay(); // This call ensures the overlay is hidden
-
-           // Reload or update the prompt list based on the action (edit or add)
+        
+            // Reload or update the prompt list based on the action (edit or add)
             if (isEdit) {
                 loadAndDisplayPrompts();
             } else {
-                loadAndDisplayPrompts(true); // Reload prompt list to display the newly added prompt
+                loadAndDisplayPrompts(); // Reload prompt list to display all prompts
             }
         });
     });
@@ -145,25 +145,25 @@ function loadAndDisplayPrompts(loadMore = false) {
     const promptsPerPage = 6;
 
     chrome.storage.local.get({ prompts: [] }, (data) => {
-        let promptsToDisplay;
+        const startIndex = loadMore ? currentPromptIndex : 0;
+        const endIndex = Math.min(startIndex + promptsPerPage, data.prompts.length);
+        const promptsToDisplay = data.prompts.slice(startIndex, endIndex);
+
         if (loadMore) {
-            startIndex = currentPromptIndex;
-            endIndex = Math.min(currentPromptIndex + promptsPerPage, data.prompts.length);
+            appendPrompts(promptsToDisplay);
         } else {
-            startIndex = 0;
-            endIndex = Math.min(promptsPerPage, data.prompts.length);
-        }
-        promptsToDisplay = data.prompts.slice(startIndex, endIndex);
-
-        if (!loadMore) {
-            promptsToDisplay = promptsToDisplay.reverse();
+            const listElement = document.getElementById('prompt-list');
+            listElement.innerHTML = ''; // Clear the list to update with new prompts
+            appendPrompts(promptsToDisplay);
         }
 
-        appendPrompts(promptsToDisplay);
         currentPromptIndex = endIndex;
         document.getElementById('load-more-prompts').style.display = currentPromptIndex < data.prompts.length ? 'block' : 'none';
     });
 }
+
+
+
 
 
 
