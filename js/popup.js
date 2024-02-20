@@ -116,12 +116,15 @@ function handleDelete(event) {
         chrome.storage.local.set({ prompts: updatedPrompts }, () => {
             console.log('Prompt deleted successfully!');
             removePromptFromList(promptId); // Remove prompt from UI
-            // Update the UI only after the deletion process is completed
-            displayUpdatedPrompts(updatedPrompts);
-            hideOverlay(); // Hide overlay after successful delete
+            
+            // Replace displayUpdatedPrompts with loadAndDisplayPrompts to refresh the prompt list
+            loadAndDisplayPrompts();
+            
+            hideOverlay(); // Ensure the overlay is hidden after deletion
         });
     });
 }
+
 
 function removePromptFromList(id) {
     const promptElement = document.querySelector(`.prompt-list_item[data-id="${id}"]`);
@@ -315,21 +318,6 @@ function handleEdit(event) {
         }
         showOverlay();
 
-    });
-}
-
-function handleDelete(event) {
-    if (!confirm("Are you sure you want to delete this prompt?")) return;
-    const promptId = event.target.getAttribute('data-id');
-    chrome.storage.local.get({ prompts: [] }, data => {
-        const updatedPrompts = data.prompts.filter(prompt => prompt.id !== promptId);
-        chrome.storage.local.set({ prompts: updatedPrompts }, () => {
-            console.log('Prompt deleted successfully!');
-            removePromptFromList(promptId); // Remove prompt from UI
-            // Update the UI only after the deletion process is completed
-            displayUpdatedPrompts(updatedPrompts);
-            hideOverlay(); // Hide overlay after successful delete
-        });
     });
 }
 
