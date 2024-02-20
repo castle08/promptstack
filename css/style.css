@@ -192,6 +192,7 @@ button#add-prompt {
     opacity: 1; 
     transform: translateY(0); 
     top: 50%; /* Center the form vertically when visible */
+    z-index: 7;
 }
 
 #prompt-form input,
