@@ -8,22 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSearchFunctionality();
     loadAndDisplayPrompts();
 
-    // Call addEditAndDeleteListeners here to attach event listeners for edit and delete buttons
-    addEditAndDeleteListeners();
-
     const addButton = document.getElementById('add-prompt');
     addButton.addEventListener('click', () => {
         const form = document.getElementById('prompt-form');
-        // Reset the form and clear editing ID only if not currently editing
-        if (!form.getAttribute('data-editing-id')) {
-            form.reset();
-            form.setAttribute('data-editing-id', '');
-        }
-        console.log('Add button clicked, form reset for new entry');
+        form.setAttribute('data-editing-id', '');
+        console.log('Add button clicked');
         form.classList.add('visible');
         showOverlay();
     });
-    
 
     document.getElementById('prompt-list').addEventListener('click', (event) => {
         if (event.target.matches('.edit-button')) {
@@ -73,80 +65,66 @@ function setupFormVisibility() {
         closeButton.hasEventListener = true;
     }
 }
+
+
 function handleFormSubmit(event) {
     event.preventDefault(); // Prevent the default form submission behavior
 
-    // Direct reference to the form element within the 'prompt-form' container
-    const form = document.querySelector('#prompt-form form');
-    if (!form) {
-        console.error('Form not found');
-        return;
-    }
-
-    // Now 'form' correctly references the form element, allowing us to call reset() on it
-    const editingId = form.getAttribute('data-editing-id');
-
-    const promptTitle = document.querySelector('#prompt-name').value.trim();
-    const promptContent = document.querySelector('#prompt-content').value.trim();
-
+    const form = event.target; // Get the form element
+    const promptTitle = form.querySelector('#prompt-name').value.trim();
+    const promptContent = form.querySelector('#prompt-content').value.trim();
+    
     // Validate prompt title and content
     if (!promptTitle || !promptContent) {
         showNotification('Please fill in all fields.');
         return;
     }
 
-    chrome.storage.local.get({ prompts: [] }, function(data) {
+    const editingId = form.getAttribute('data-editing-id');
+
+    chrome.storage.local.get({prompts: []}, function(data) {
         let prompts = data.prompts;
-        let operationSuccess = false;
+        let isEdit = false;
 
         if (editingId) {
-            // Editing existing prompt
-            const index = prompts.findIndex(prompt => String(prompt.id) === String(editingId));
-            if (index !== -1) {
-                prompts[index] = { ...prompts[index], title: promptTitle, content: promptContent };
-                operationSuccess = true;
-                showNotification('Prompt updated successfully!');
-            }
-        } else {
-            // Adding a new prompt
-            const newPrompt = { id: Date.now().toString(), title: promptTitle, content: promptContent };
-            prompts.unshift(newPrompt);
-            operationSuccess = true;
-            showNotification('Prompt saved successfully!');
-        }
-
-        if (operationSuccess) {
-            chrome.storage.local.set({ prompts: prompts }, function() {
-                // Clear form for next input
-                form.reset();
-                form.removeAttribute('data-editing-id');
-                document.getElementById('prompt-form').classList.remove('visible');
-                hideOverlay();
-                loadAndDisplayPrompts(); // Refresh the list of prompts
-
-                // After successful submission, update the view prompt content if it's open
-                const viewPromptElement = document.getElementById('view-prompt');
-                if (viewPromptElement) {
-                    const titleElement = viewPromptElement.querySelector('#prompt-view-title');
-                    const contentElement = viewPromptElement.querySelector('#prompt-view-content');
-                    if (titleElement && contentElement) {
-                        titleElement.textContent = promptTitle;
-                        contentElement.textContent = promptContent;
-                        console.log('View prompt content updated after form submission.');
-                    }
+            prompts = prompts.map(prompt => {
+                if (prompt.id === editingId) {
+                    isEdit = true;
+                    return {...prompt, title: promptTitle, content: promptContent};
                 }
+                return prompt;
             });
+            showNotification('Prompt updated successfully!');
+        } else {
+            const newPrompt = {id: Date.now().toString(), title: promptTitle, content: promptContent};
+            prompts.unshift(newPrompt); // Add new prompt to the beginning of the array
+            showNotification('Prompt saved successfully!');
+            console.log('Form submitted successfully!');
         }
+
+        chrome.storage.local.set({prompts: prompts}, function() {
+            // Reset form fields and hide the form
+            form.reset();
+            form.removeAttribute('data-editing-id');
+            document.getElementById('prompt-form').classList.remove('visible'); // Remove 'visible' class from the correct element
+            form.classList.add('newclass');
+            
+            // Reload or update the prompt list based on the action (edit or add)
+            if (isEdit) {
+                loadAndDisplayPrompts();
+            } else {
+                loadAndDisplayPrompts(); // Reload prompt list to display all prompts
+            }
+            
+            // Hide overlay only if the view prompt box is closed
+            const viewPromptElement = document.getElementById('view-prompt');
+            const viewPromptOpen = viewPromptElement !== null;
+            if (!viewPromptOpen) {
+                hideOverlay();
+            }
+        });
     });
 }
-
-
-
-
-
-
-
-
 
 
 function handleDelete(event) {
@@ -279,12 +257,11 @@ function handleView(event) {
 
                 const viewPromptElement = document.createElement('div');
                 viewPromptElement.id = 'view-prompt';
-                viewPromptElement.dataset.promptId = promptToView.id; // Assign the prompt ID to the view box
                 viewPromptElement.classList.add('prompt-container');
                 viewPromptElement.innerHTML = `
                     <div class="prompt-view">
-                        <h3 id="prompt-view-title">${promptToView.title}</h3>
-                        <p id="prompt-view-content">${promptToView.content}</p>
+                        <h3>${promptToView.title}</h3>
+                        <p>${promptToView.content}</p>
                     </div>
                     <div class="prompt-actions">
                         <button class="copy-button fa fa-copy icon" data-content="${promptToView.content}"></button>
@@ -321,7 +298,6 @@ function handleView(event) {
 
 
 
-
 function addEditAndDeleteListeners() {
     const editButtons = document.querySelectorAll('.edit-button');
     const deleteButtons = document.querySelectorAll('.delete-button');
@@ -331,59 +307,50 @@ function addEditAndDeleteListeners() {
 }
 
 function handleEdit(event) {
-    console.log('Edit button clicked');
     event.stopPropagation(); // Stop the event from propagating to parent elements
-
     const promptId = event.target.getAttribute('data-id');
-    const form = document.getElementById('prompt-form');
-    form.setAttribute('data-editing-id', promptId);
-    console.log('Editing ID set on form:', promptId);
+    console.log('Editing prompt with ID:', promptId); // Check if the correct prompt ID is retrieved
+    chrome.storage.local.get({prompts: []}, data => {
+        const promptToEdit = data.prompts.find(prompt => prompt.id === promptId);
+        if (promptToEdit) {
+            const form = document.getElementById('prompt-form');
+            form.setAttribute('data-editing-id', promptId);
+            document.getElementById('prompt-name').value = promptToEdit.title;
+            document.getElementById('prompt-content').value = promptToEdit.content;
 
-    // Update the content in the view prompt box if it's open with the prompt being edited
-    const viewPromptElement = document.getElementById('view-prompt');
-    console.log('View prompt element:', viewPromptElement);
+            // Update form title
+            const formTitle = document.querySelector('#prompt-form h2');
+            formTitle.textContent = 'Edit Prompt'; // Update the form title
 
-    console.log('viewPromptElement.dataset.promptId:', viewPromptElement.dataset.promptId);
-    console.log('promptId:', promptId);
+            console.log('Edit button clicked');
+            form.classList.add('visible');
 
-    if (viewPromptElement && viewPromptElement.dataset.promptId === promptId) {
-        console.log('promptId:', promptId);
-        console.log('viewPromptElement dataset id:', viewPromptElement.dataset.promptId);
-
-        chrome.storage.local.get({ prompts: [] }, data => {
-            const promptToEdit = data.prompts.find(prompt => prompt.id === promptId);
-            if (promptToEdit) {
-                document.getElementById('prompt-name').value = promptToEdit.title;
-                document.getElementById('prompt-content').value = promptToEdit.content;
-
-                // Update form title
-                const formTitle = document.querySelector('#prompt-form h2');
-                formTitle.textContent = 'Edit Prompt'; // Update the form title
-
-                console.log('Edit button clicked');
-                form.classList.add('visible');
-
-                // Hide overlay only if the view prompt box is closed
-                const viewPromptOpen = viewPromptElement !== null;
-                if (!viewPromptOpen) {
-                    hideOverlay();
-                }
-
-                // Add event listener to handle form submission
-                document.getElementById('prompt-form').addEventListener('submit', handleFormSubmit);
-
-                // Update content in the view prompt box after the form is submitted
-                // Commenting out updateViewPromptContent(promptId);
+            // Update the content in the view prompt box if it's open
+            const viewPromptElement = document.getElementById('view-prompt');
+            if (viewPromptElement) {
+                viewPromptElement.querySelector('h3').textContent = promptToEdit.title;
+                viewPromptElement.querySelector('p').textContent = promptToEdit.content;
             }
-        });
-    } else {
-        console.log('View prompt element not found or prompt ID does not match.');
-    }
+
+            // Update the content in the grid view
+            const promptListItem = document.querySelector(`.prompt-list_item[data-id="${promptId}"]`);
+            if (promptListItem) {
+                const titleElement = promptListItem.querySelector('h3');
+                const excerptElement = promptListItem.querySelector('p');
+                if (titleElement && excerptElement) {
+                    titleElement.textContent = promptToEdit.title;
+                    excerptElement.textContent = truncateString(promptToEdit.content, 90);
+                }
+            }
+
+            // Hide overlay only if the view prompt box is closed
+            const viewPromptOpen = viewPromptElement !== null;
+            if (!viewPromptOpen) {
+                hideOverlay();
+            }
+        }
+    });
 }
-
-
-
-
 
 
 
