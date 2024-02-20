@@ -7,6 +7,7 @@ function showOverlay() {
     }
 }
 
+
 // Function to hide the overlay
 function hideOverlay() {
     const overlay = document.getElementById('overlay');

@@ -169,6 +169,7 @@ function appendPrompts(prompts) {
     prompts.forEach(prompt => {
         const promptElement = document.createElement('div');
         promptElement.classList.add('prompt-list_item');
+        promptElement.dataset.id = prompt.id; // Set the data-id attribute for potential future use
         promptElement.innerHTML = `
             <div class="top-content">
                 <h3>${prompt.title}</h3>
@@ -179,11 +180,18 @@ function appendPrompts(prompts) {
                 <button class="copy-button fa fa-copy icon" data-content="${prompt.content}"></button>
             </div>
         `;
-        listElement.appendChild(promptElement); // Append new prompts to the end of the list
-    });
+        listElement.appendChild(promptElement);
 
-    addViewAndCopyListeners(); // Add listeners for view and copy buttons in the grid view
+        // Attach event listeners correctly
+        const viewButton = promptElement.querySelector('.view-button');
+        viewButton.addEventListener('click', handleView); // Pass the event handler directly without wrapping it
+
+        const copyButton = promptElement.querySelector('.copy-button');
+        copyButton.addEventListener('click', copyHandler);
+    });
 }
+
+
 
 
 
@@ -212,55 +220,56 @@ function displayPrompts(prompts) {
 
 
 
+
 function handleView(event) {
-    console.log('handleView() called.');
-    const promptId = event.target.getAttribute('data-id');
-    chrome.storage.local.get({prompts: []}, data => {
-        const promptToView = data.prompts.find(prompt => prompt.id === promptId);
-        if (promptToView) {
-            // Check if the view prompt already exists
-            let existingViewPrompt = document.getElementById('view-prompt');
-            if (existingViewPrompt) {
-                // If it exists, remove it before creating a new one
-                existingViewPrompt.remove();
+    let element = event.target.closest('.view-button'); // Ensure we're getting the correct element with data-id
+    if (element && element.dataset.id) {
+        const promptId = element.dataset.id;
+        chrome.storage.local.get({prompts: []}, data => {
+            const promptToView = data.prompts.find(prompt => prompt.id === promptId);
+            if (promptToView) {
+                let existingViewPrompt = document.getElementById('view-prompt');
+                if (existingViewPrompt) {
+                    existingViewPrompt.remove();
+                }
+
+                const viewPromptElement = document.createElement('div');
+                viewPromptElement.id = 'view-prompt';
+                viewPromptElement.classList.add('prompt-container');
+                viewPromptElement.innerHTML = `
+                    <div class="prompt-view">
+                        <h3>${promptToView.title}</h3>
+                        <p>${promptToView.content}</p>
+                    </div>
+                    <div class="prompt-actions">
+                        <button class="copy-button" data-content="${promptToView.content}">Copy</button>
+                        <button class="edit-button" data-id="${promptToView.id}">Edit</button>
+                        <button class="delete-button" data-id="${promptToView.id}">Delete</button>
+                    </div>
+                    <button id="close-view-button">Close</button>
+                `;
+
+                document.body.appendChild(viewPromptElement);
+                document.querySelector('#view-prompt .copy-button').addEventListener('click', copyHandler);
+                document.querySelector('#view-prompt .edit-button').addEventListener('click', () => handleEdit(promptToView.id));
+                document.querySelector('#view-prompt .delete-button').addEventListener('click', () => handleDelete(promptToView.id));
+                document.getElementById('close-view-button').addEventListener('click', () => {
+                    viewPromptElement.remove();
+                    hideOverlay();
+                });
+
+                showOverlay();
+            } else {
+                console.error('Prompt not found');
             }
-
-            // Create and append the new view prompt element
-            const viewPromptElement = document.createElement('div');
-            viewPromptElement.id = 'view-prompt';
-            viewPromptElement.classList.add('prompt-container');
-            viewPromptElement.innerHTML = `
-                <div class="top">
-                    <h3>${promptToView.title}</h3>
-                    <p>${promptToView.content}</p>
-                </div>
-                <div class="buttons">
-                    <button class="copy-button fa fa-copy icon" data-content="${promptToView.content}"></button>
-                    <button class="edit-button fa fa-edit" data-id="${promptToView.id}"></button>
-                    <button class="delete-button fa fa-trash" data-id="${promptToView.id}"></button>
-                </div>
-                <button id="close-view-button" class="fa fa-close icon" type="button"></button>
-            `;
-            document.body.appendChild(viewPromptElement);
-
-            // Setup event listeners for the newly created buttons
-            document.querySelector('#view-prompt .copy-button').addEventListener('click', copyHandler);
-            document.querySelector('#view-prompt .edit-button').addEventListener('click', () => handleEdit(promptToView.id));
-            document.querySelector('#view-prompt .delete-button').addEventListener('click', () => handleDelete(promptToView.id));
-
-            // Close button event listener for the view prompt
-            document.getElementById('close-view-button').addEventListener('click', () => {
-                viewPromptElement.remove();
-                hideOverlay(); // Call hideOverlay from ui.js
-            });
-
-            console.log('View prompt displayed.');
-
-            // Ensure overlay is shown
-            showOverlay(); // Call showOverlay from ui.js
-        }
-    });
+        });
+    } else {
+        console.error('Event target does not contain data-id attribute.');
+    }
 }
+
+
+
 
 
 function addEditAndDeleteListeners() {
