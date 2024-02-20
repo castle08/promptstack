@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addButton.addEventListener('click', () => {
         const form = document.getElementById('prompt-form');
         form.setAttribute('data-editing-id', '');
+        console.log('Add button clicked');
         form.classList.add('visible');
         showOverlay();
     });
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             handleDelete(event);
         }
     });
-
+    console.log("Adding event listener for form submission...");
     document.getElementById('prompt-form').addEventListener('submit', handleFormSubmit);
 });
 
@@ -50,12 +51,21 @@ function setupFocusHandling() {
 
 function setupFormVisibility() {
     const form = document.getElementById('prompt-form');
+    const closeButton = document.getElementById('close-button');
 
-    document.getElementById('close-button').addEventListener('click', () => {
-        form.classList.remove('visible');
-        hideOverlay(); // Ensure overlay is hidden when form is closed
-    });
+    // Check if the event listener is already attached
+    if (!closeButton.hasEventListener) {
+        closeButton.addEventListener('click', () => {
+            form.classList.remove('visible');
+            console.log('Close button event listener attached');
+            hideOverlay(); // Ensure overlay is hidden when form is closed
+        });
+
+        // Set a flag to indicate that the event listener has been attached
+        closeButton.hasEventListener = true;
+    }
 }
+
 
 function handleFormSubmit(event) {
     event.preventDefault(); // Prevent the default form submission behavior
@@ -89,13 +99,15 @@ function handleFormSubmit(event) {
             const newPrompt = {id: Date.now().toString(), title: promptTitle, content: promptContent};
             prompts.unshift(newPrompt); // Add new prompt to the beginning of the array
             showNotification('Prompt saved successfully!');
+            console.log('Form submitted successfully!');
         }
 
         chrome.storage.local.set({prompts: prompts}, function() {
             // Reset form fields and hide the form
             form.reset();
             form.removeAttribute('data-editing-id');
-            form.classList.remove('visible');
+            document.getElementById('prompt-form').classList.remove('visible'); // Remove 'visible' class from the correct element
+            form.classList.add('newclass');
             hideOverlay(); // This call ensures the overlay is hidden
         
             // Reload or update the prompt list based on the action (edit or add)
@@ -104,6 +116,7 @@ function handleFormSubmit(event) {
             } else {
                 loadAndDisplayPrompts(); // Reload prompt list to display all prompts
             }
+            console.log("After reload");
         });
     });
 }
@@ -304,6 +317,7 @@ function handleEdit(event) {
             const formTitle = document.querySelector('#prompt-form h2');
             formTitle.textContent = 'Edit Prompt'; // Update the form title
 
+            console.log('Edit button clicked');
             form.classList.add('visible');
 
             // Update the content in the grid view
